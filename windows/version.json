@@ -1,0 +1,8 @@
+{
+  "version": "0.9.4-windows-preview.2",
+  "node": "24.22.2",
+  "nodeSha256": "1c331340fa6cac5e4294725959070a143fa0507195a78ad77eed7943f719aac9",
+  "upstream": "f1cc9764a2dc7ccc4e459606cd3311da9d111896",
+  "windowsBaseline": "1c5359dc648a99525bb6c169f7149e51d3ce9712",
+  "platform": "win32-x64"
+}

@@ -1,0 +1,18 @@
+name: Windows preview checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.2'
+      - run: node --test windows/windows.test.cjs
+      - run: node windows/build.cjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Windows-x64-preview
+          path: dist/*
