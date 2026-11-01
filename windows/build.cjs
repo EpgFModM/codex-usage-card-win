@@ -5,8 +5,8 @@ if(!fs.existsSync(exe)||crypto.createHash('sha256').update(fs.readFileSync(exe))
 const license=await fetch('https://raw.githubusercontent.com/nodejs/node/v24.22.2/LICENSE');if(!license.ok)throw Error('Node license unavailable');fs.writeFileSync(path.join(runtime,'LICENSE.txt'),await license.text());
 fs.copyFileSync(path.join(root,'LICENSE'),path.join(__dirname,'LICENSE'));
 for(const name of ['ATTRIBUTION.md','SECURITY.md'])fs.copyFileSync(path.join(root,name),path.join(__dirname,name));
-fs.writeFileSync(path.join(__dirname,'version.json'),JSON.stringify({version:'0.9.4-windows-preview.2',node:'24.22.2',nodeSha256:hash,upstream:'f1cc9764a2dc7ccc4e459606cd3311da9d111896',windowsBaseline:'1c5359dc648a99525bb6c169f7149e51d3ce9712',platform:'win32-x64'},null,2));
-fs.mkdirSync(path.join(root,'dist'),{recursive:true});const zip=path.join(root,'dist','CodexUsageCard-Windows-x64-0.9.4-preview.2.zip');
+fs.writeFileSync(path.join(__dirname,'version.json'),JSON.stringify({version:'0.9.4-windows',node:'24.22.2',nodeSha256:hash,upstream:'f1cc9764a2dc7ccc4e459606cd3311da9d111896',windowsBaseline:'1c5359dc648a99525bb6c169f7149e51d3ce9712',platform:'win32-x64'},null,2));
+fs.mkdirSync(path.join(root,'dist'),{recursive:true});const zip=path.join(root,'dist','CodexUsageCard-Windows-x64-0.9.4.zip');
 execFileSync('python',['-c',`import zipfile,pathlib; r=pathlib.Path(${JSON.stringify(__dirname)}); z=zipfile.ZipFile(${JSON.stringify(zip)},'w',zipfile.ZIP_DEFLATED); [z.write(p,pathlib.Path('CodexUsageCard')/p.relative_to(r)) for p in r.rglob('*') if p.is_file() and p.suffix not in ('.log',)]; z.close()`],{stdio:'inherit'});
 const digest=crypto.createHash('sha256').update(fs.readFileSync(zip)).digest('hex');fs.writeFileSync(path.join(root,'dist','SHA256SUMS.txt'),digest+'  '+path.basename(zip)+'\n');console.log(zip+'\nSHA256 '+digest);
 })().catch(e=>{console.error(e);process.exitCode=1});

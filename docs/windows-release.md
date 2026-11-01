@@ -16,18 +16,18 @@
 ```powershell
 node --test windows/windows.test.cjs
 node windows/build.cjs
-Get-FileHash .\dist\CodexUsageCard-Windows-x64-0.9.4-preview.2.zip -Algorithm SHA256
+Get-FileHash .\dist\CodexUsageCard-Windows-x64-0.9.4.zip -Algorithm SHA256
 ```
 
-确认 15 项测试通过、哈希与 `dist/SHA256SUMS.txt` 相符，并检查 ZIP 根目录为 `CodexUsageCard/`，包含操作脚本、组件源码、README、验证说明、项目许可证、来源署名和 `runtime/LICENSE.txt`。后续新增测试时以实际测试总数为准。
+确认 18 项测试通过、哈希与 `dist/SHA256SUMS.txt` 相符，并检查 ZIP 根目录为 `CodexUsageCard/`，包含操作脚本、组件源码、README、验证说明、项目许可证、来源署名和 `runtime/LICENSE.txt`。后续新增测试时以实际测试总数为准。
 
 在独立解压目录测试启动、安装快捷方式、状态、停止和卸载。记录真实测试环境，未验证平台继续标注为未验证；不得仅凭构建成功声明完整兼容。
 
 ## GitHub Release
 
 1. 提交并推送已检查的源代码，确认 Windows Actions 检查通过。
-2. 在该提交上创建版本标签，例如 `v0.9.4-windows-preview.2`。
-3. 从仓库 Releases 创建发布，预览版本勾选 **Set as a pre-release**。
+2. 在该提交上创建版本标签，例如 `v0.9.4-windows`。
+3. 从仓库 Releases 创建发布，正式版不勾选 **Set as a pre-release**，并设为 Latest；后续预览版本才勾选预发布。
 4. 上传同一次构建生成的 ZIP 和 `SHA256SUMS.txt`，说明改动、依赖、启动方式、验证环境和已知限制。
 5. 下载已上传的 ZIP，再次比对 SHA256。不要混用不同构建的 ZIP 与校验文件。
 

@@ -1,6 +1,6 @@
 # Windows 使用与开发说明
 
-面向 Microsoft Store Codex 的 Windows x64 社区预览版。下载与图形化操作见[项目首页](https://github.com/EpgFModM/codex-usage-card-win#readme)，实际验证范围见 [VALIDATION.md](VALIDATION.md)。
+面向 Microsoft Store Codex 的 Windows x64 社区正式版。下载与图形化操作见[项目首页](https://github.com/EpgFModM/codex-usage-card-win#readme)，实际验证范围见 [VALIDATION.md](VALIDATION.md)。
 
 ## 发布包使用
 

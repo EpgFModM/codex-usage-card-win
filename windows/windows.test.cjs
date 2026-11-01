@@ -1,7 +1,38 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {spawn}=require('node:child_process');
-const {options,launchArgs,shutdownAgent}=require('./windows.cjs');
+const {options,launchArgs,desktopLaunchPath,launchDesktop,shutdownAgent}=require('./windows.cjs');
+
+test('Store launch uses registered alias and preserves debugging arguments',async()=>{
+ const path=require('node:path'),{EventEmitter}=require('node:events');
+ const app='C:/Program Files/WindowsApps/OpenAI.Codex_26.1027_x64__test/app/ChatGPT.exe';
+ const local=path.resolve('test user 测试'),alias=path.join(local,'Microsoft','WindowsApps','chatgpt-desktop.exe');
+ let unreferenced=false;
+ const child=await launchDesktop(app,{localAppData:local,exists:p=>p===alias,spawnProcess:(target,args,options)=>{
+  assert.equal(target,alias);assert.deepEqual(args,launchArgs());assert.equal(options.detached,true);assert.equal(options.stdio,'ignore');
+  const child=new EventEmitter();child.unref=()=>{unreferenced=true};queueMicrotask(()=>child.emit('spawn'));return child;
+ }});
+ assert.ok(child);assert.equal(unreferenced,true);
+ assert.equal(desktopLaunchPath(app,local,()=>false),app);
+ const custom='D:/custom Codex/ChatGPT.exe';assert.equal(desktopLaunchPath(custom,local,()=>true),custom);
+});
+
+test('execution alias reparse point is detected without following its target',t=>{
+ const fs=require('node:fs'),path=require('node:path');const local=path.resolve('alias test');
+ const alias=path.join(local,'Microsoft','WindowsApps','chatgpt-desktop.exe');
+ t.mock.method(fs,'existsSync',()=>false);
+ t.mock.method(fs,'lstatSync',p=>{assert.equal(p,alias);return {isDirectory:()=>false};});
+ assert.equal(desktopLaunchPath('C:/WindowsApps/OpenAI.Codex_test/app/ChatGPT.exe',local),alias);
+});
+
+test('launch rejection reports actual target for synchronous and asynchronous errors',async()=>{
+ const {EventEmitter}=require('node:events');const app='D:/custom Codex/ChatGPT.exe';
+ for(const synchronous of [true,false])await assert.rejects(launchDesktop(app,{spawnProcess:()=>{
+  const error=Object.assign(new Error('spawn EPERM'),{code:'EPERM'});
+  if(synchronous)throw error;
+  const child=new EventEmitter();queueMicrotask(()=>child.emit('error',error));return child;
+ }}),error=>error.message.includes('EPERM')&&error.message.includes(app));
+});
 const {formatRateLimits,unavailableValue,parseArgs,resolveCodexBin,AppServerClient}=require('./agent.cjs');
 test('local endpoint only',()=>assert.deepEqual(launchArgs(),['--remote-debugging-address=127.0.0.1','--remote-debugging-port=39222']));
 test('paths with spaces and Chinese remain whole',()=>{const o=options(['--app','C:/测试 folder/ChatGPT.exe']);assert.match(o.app,/测试 folder/);assert.throws(()=>options(['--bad','x']));});

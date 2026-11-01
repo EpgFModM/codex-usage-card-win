@@ -2,7 +2,7 @@
 
 在 Codex 桌面应用侧栏显示剩余额度的 Windows 社区适配版。
 
-**当前版本：`0.9.4-windows-preview.2`（预览版）。** 目标平台为 Windows 10 22H2 / Windows 11 x64 的 Microsoft Store Codex。已有 Windows 11 环境下的验证记录；Windows 10、ARM64、非 Store 安装及长期运行情况尚未完成验证。详见[验证记录](windows/VALIDATION.md)。
+**当前版本：`0.9.4-windows`（正式版）。** 目标平台为 Windows 10 22H2 / Windows 11 x64 的 Microsoft Store Codex。已有 Windows 11 验证记录；本次 Windows 10 22H2 x64 启动修复已由用户确认成功。ARM64、非 Store 安装及长期运行情况尚未完成验证。详见[验证记录](windows/VALIDATION.md)。
 
 本项目由 [EpgFModM](https://github.com/EpgFModM) 维护，基于 [Lorie7813/codex-usage-card](https://github.com/Lorie7813/codex-usage-card)，并参考 SimonTan95 的 Windows 草稿。完整来源见[署名与第三方许可](ATTRIBUTION.md)。这是非官方社区项目，与 OpenAI 无官方关联或背书。
 
@@ -20,7 +20,7 @@
 2. 在 PowerShell 中核对 ZIP 的 SHA256，并与校验文件对应条目比较：
 
    ```powershell
-   Get-FileHash .\CodexUsageCard-Windows-x64-0.9.4-preview.2.zip -Algorithm SHA256
+   Get-FileHash .\CodexUsageCard-Windows-x64-0.9.4.zip -Algorithm SHA256
    ```
 
 3. 完整解压到固定目录。保存工作并完全退出 Codex，然后双击解压目录中的 **`Start.cmd`**；首次启动最多等待约 60 秒。
@@ -49,6 +49,8 @@
 
 **启动提示 Codex 已运行？** 保存工作并完全退出客户端，再使用 `Start.cmd` 或专用快捷方式启动。组件不会强制结束现有会话。
 
+**Win10 启动提示 spawn EPERM？** 正式版通过注册的 `chatgpt-desktop.exe` 应用执行别名启动 Store 客户端。请更新到正式版，并确认 Windows 设置中的该应用执行别名已启用。
+
 **未出现卡片或显示不可用？** 先运行 `Status.cmd` 和 `Doctor.cmd`。确认安装的是 Microsoft Store Codex，已登录，且当前客户端接口和侧栏结构兼容。额度字段缺失、登录失效或客户端升级都可能导致不可用。
 
 **提示 39222 端口被占用？** 检查占用程序并自行处理后重试。组件不会自动终止端口占用者。
@@ -70,7 +72,7 @@ node windows/build.cjs
 
 ```text
 dist/
-  CodexUsageCard-Windows-x64-0.9.4-preview.2.zip
+  CodexUsageCard-Windows-x64-0.9.4.zip
   SHA256SUMS.txt
 ```
 
@@ -84,6 +86,6 @@ dist/
 
 ## English
 
-Unofficial Windows community adaptation of Codex Usage Card. Displays remaining Codex allowance in the desktop sidebar using the local CLI app-server and a loopback debugging connection. Targets Microsoft Store Codex on Windows x64; Windows 11 has limited validation, while Windows 10 remains untested. This project is not affiliated with OpenAI.
+Unofficial Windows community adaptation of Codex Usage Card. Displays remaining Codex allowance in the desktop sidebar using the local CLI app-server and a loopback debugging connection. Targets Microsoft Store Codex on Windows x64; Windows 11 has limited validation; the Windows 10 22H2 launch fix has been confirmed working by the user. This project is not affiliated with OpenAI.
 
 Download a Windows ZIP from [Releases](https://github.com/EpgFModM/codex-usage-card-win/releases), verify its SHA256, extract it fully, save your work and quit Codex, then run `Start.cmd`. Optionally run `Install.cmd` to create a Start menu shortcut. Use `Stop.cmd` to stop the add-on and `Uninstall.cmd` to remove its shortcut. Do not expose port `39222`. See [Security](SECURITY.md), [Validation](windows/VALIDATION.md), and [Attribution](ATTRIBUTION.md) before distributing or installing.

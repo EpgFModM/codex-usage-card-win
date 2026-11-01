@@ -1,4 +1,4 @@
-name: Windows preview checks
+name: Windows checks
 on: [push, pull_request]
 permissions:
   contents: read
@@ -14,5 +14,5 @@ jobs:
       - run: node windows/build.cjs
       - uses: actions/upload-artifact@v4
         with:
-          name: Windows-x64-preview
+          name: Windows-x64
           path: dist/*

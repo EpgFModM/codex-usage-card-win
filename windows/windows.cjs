@@ -7,6 +7,21 @@ const pipe='\\\\.\\pipe\\codex-usage-card-'+crypto.createHash('sha256').update(o
 const stateDir=path.join(process.env.LOCALAPPDATA||os.tmpdir(),'CodexUsageCard');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const launchArgs=()=>['--remote-debugging-address=127.0.0.1',`--remote-debugging-port=${port}`];
+function launchEntryExists(file){try{return !fs.lstatSync(file).isDirectory();}catch{return false;}}
+function desktopLaunchPath(app,localAppData=process.env.LOCALAPPDATA,exists=launchEntryExists){
+ // Activate Store apps through their registered alias: direct EXE launch fails on Win10.
+ const storeApp=/[\\/]OpenAI\.Codex_[^\\/]+[\\/]app[\\/]ChatGPT\.exe$/i.test(app);
+ const alias=localAppData&&path.join(localAppData,'Microsoft','WindowsApps','chatgpt-desktop.exe');
+ return storeApp&&alias&&exists(alias)?alias:app;
+}
+async function launchDesktop(app,{localAppData=process.env.LOCALAPPDATA,exists=launchEntryExists,spawnProcess=spawn}={}){
+ const target=desktopLaunchPath(app,localAppData,exists);
+ try{return await new Promise((resolve,reject)=>{
+  const child=spawnProcess(target,launchArgs(),{detached:true,stdio:'ignore',windowsHide:false});
+  child.once('error',reject);
+  child.once('spawn',()=>{child.unref();resolve(child);});
+ });}catch(e){throw Error(`无法启动 Codex（${e.code||e.message}）：${target}。若为 Store 版，请检查 Windows 设置中的 chatgpt-desktop.exe 应用执行别名是否启用。`,{cause:e});}
+}
 function ps(code){return execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"[Console]::OutputEncoding=[Text.UTF8Encoding]::new();"+code],{encoding:'utf8',windowsHide:true,timeout:15000}).trim();}
 function options(args){const o={};for(let i=0;i<args.length;i++){if(!['--app','--codex-bin'].includes(args[i])||!args[i+1])throw Error('参数无效');o[args[i].slice(2)]=path.resolve(args[++i]);}return o;}
 function processes(){return JSON.parse(ps("ConvertTo-Json -Compress -InputObject @(Get-Process ChatGPT -ErrorAction SilentlyContinue | Where-Object { $_.Path -like '*OpenAI.Codex_*' } | Select-Object Id,Path)" )||'[]');}
@@ -28,7 +43,7 @@ async function monitor(attach,o){
  try{
  const {app,cli}=discover(o);const running=processes().some(p=>p.Path?.toLowerCase()===app.toLowerCase());
  if(attach){if(!running||!(await pages()).length)throw Error('没有可连接的 Codex 主窗口。');}
- else {if(running)throw Error('请保存工作并完全退出 Codex，再从专用快捷方式启动。');if(await occupied())throw Error('39222 端口已占用，请先关闭占用程序。');desktop=spawn(app,launchArgs(),{detached:true,stdio:'ignore',windowsHide:false});desktop.on('error',e=>{state={phase:'error',error:e.message};stopping=true});desktop.unref();}
+ else {if(running)throw Error('请保存工作并完全退出 Codex，再从专用快捷方式启动。');if(await occupied())throw Error('39222 端口已占用，请先关闭占用程序。');desktop=await launchDesktop(app);}
  let ready=false;for(let i=0;i<60&&!stopping;i++){try{if((await pages()).length){ready=true;break;}}catch{}await sleep(1000);}
  if(!ready)throw Error('60 秒内未找到 Codex 主窗口。请运行诊断并检查客户端版本。');
  let absent=0;
@@ -64,5 +79,5 @@ async function main(){const args=process.argv.slice(2);const cmd=args.shift()||'
  for(let i=0;i<70;i++){await sleep(1000);try{const s=await rpc('status');if(s.phase==='error')throw Error(s.error);if(s.phase==='running'){console.log('额度卡片已启动。');return;}}catch(e){if(fs.existsSync(path.join(stateDir,'last-error.txt')))throw Error(fs.readFileSync(path.join(stateDir,'last-error.txt'),'utf8'));}}
  throw Error('启动超时，请运行 Doctor.cmd 查看诊断。');
 }
-module.exports={launchArgs,options,shutdownAgent,occupied,pipe,rpc};
+module.exports={launchArgs,desktopLaunchPath,launchDesktop,options,shutdownAgent,occupied,pipe,rpc};
 if(require.main===module)main().catch(e=>{console.error(e.message);if(process.argv.includes('--notify'))try{const msg=Buffer.from(e.message,'utf8').toString('base64');ps(`Add-Type -AssemblyName PresentationFramework;[System.Windows.MessageBox]::Show([Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${msg}')),'Codex Usage Card')|Out-Null`);}catch{}process.exitCode=1;});

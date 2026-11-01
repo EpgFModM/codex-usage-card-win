@@ -2,6 +2,15 @@
 
 本文件记录 Windows 社区适配版。版本标识来自 `windows/version.json`；日期表示变更记录日期，不表示已发布 GitHub Release。
 
+## 0.9.4-windows · 2026-11-01
+
+- 发布 Windows x64 正式版，保留 Node.js 24.22.2 便携运行时。
+- 修复 Windows 10 直接启动 Store Codex 安装目录内 EXE 时的 `spawn EPERM`；优先使用注册的 `chatgpt-desktop.exe` 应用执行别名，并保留本地调试参数。
+- 使用 `lstat` 识别应用执行别名的特殊重解析点，避免普通存在检查将其误判为不存在。
+- 启动失败时显示实际目标和错误码；捕获同步、异步创建进程错误。
+- 新增 3 项回归测试，测试总数为 18。
+- 用户已确认 Windows 10 22H2 x64 修复后成功启动；既有 Windows 11 验证记录保留。长期运行及其他未验收项目仍见验证记录。
+
 ## 0.9.4-windows-preview.2 · 2026-10-31
 
 - 修复 app-server 初始化期间收到 `account/updated` 后连接被中断、额度持续不可用的问题。
